@@ -1,0 +1,14 @@
+C:\Projects\Jellyfin\AuthLib\AuthLib\bin\Debug\net6.0\AuthLib.deps.json
+C:\Projects\Jellyfin\AuthLib\AuthLib\bin\Debug\net6.0\AuthLib.runtimeconfig.json
+C:\Projects\Jellyfin\AuthLib\AuthLib\bin\Debug\net6.0\AuthLib.dll
+C:\Projects\Jellyfin\AuthLib\AuthLib\bin\Debug\net6.0\AuthLib.pdb
+C:\Projects\Jellyfin\AuthLib\AuthLib\obj\Debug\net6.0\AuthLib.csproj.AssemblyReference.cache
+C:\Projects\Jellyfin\AuthLib\AuthLib\obj\Debug\net6.0\AuthLib.GeneratedMSBuildEditorConfig.editorconfig
+C:\Projects\Jellyfin\AuthLib\AuthLib\obj\Debug\net6.0\AuthLib.AssemblyInfoInputs.cache
+C:\Projects\Jellyfin\AuthLib\AuthLib\obj\Debug\net6.0\AuthLib.AssemblyInfo.cs
+C:\Projects\Jellyfin\AuthLib\AuthLib\obj\Debug\net6.0\AuthLib.csproj.CoreCompileInputs.cache
+C:\Projects\Jellyfin\AuthLib\AuthLib\obj\Debug\net6.0\AuthLib.dll
+C:\Projects\Jellyfin\AuthLib\AuthLib\obj\Debug\net6.0\refint\AuthLib.dll
+C:\Projects\Jellyfin\AuthLib\AuthLib\obj\Debug\net6.0\AuthLib.pdb
+C:\Projects\Jellyfin\AuthLib\AuthLib\obj\Debug\net6.0\AuthLib.genruntimeconfig.cache
+C:\Projects\Jellyfin\AuthLib\AuthLib\obj\Debug\net6.0\ref\AuthLib.dll

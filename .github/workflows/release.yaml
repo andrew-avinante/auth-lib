@@ -57,6 +57,8 @@ jobs:
       release_version: ${{ needs.calculate_version.outputs.artifacts_version }}
       info_version: ${{ needs.calculate_version.outputs.info_version }}
     secrets:
-      gh_token: ${{ secrets.GITHUB_TOKEN }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
       REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+      NUGET_REPO: ${{ secrets.NUGET_REPO }}
+      NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}

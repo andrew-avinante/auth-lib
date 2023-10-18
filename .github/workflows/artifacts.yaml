@@ -15,13 +15,13 @@ on:
         required: true
         type: string
     secrets:
-      gh_token:
+      GH_TOKEN:
         required: true
       REGISTRY_USERNAME:
         required: true
       REGISTRY_PASSWORD:
         required: true
-      NEXUS_REPO:
+      NUGET_REPO:
         required: true
       NUGET_API_KEY:
         required: true
@@ -61,7 +61,7 @@ jobs:
 
       - name: Publish to Nexus
         run: |
-          dotnet nuget push ./${{ env.RELEASE_NAME }} --source ${{ secrets.NEXUS_REPO }} --api-key ${{ secrets.NUGET_API_KEY }} 
+          dotnet nuget push ./${{ env.RELEASE_NAME }} --source ${{ secrets.NUGET_REPO }} --api-key ${{ secrets.NUGET_API_KEY }} 
         env:
           NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
 
@@ -73,4 +73,4 @@ jobs:
           files: |
             ${{ env.RELEASE_NAME }}
         env:
-          GITHUB_TOKEN: ${{ secrets.gh_token }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}

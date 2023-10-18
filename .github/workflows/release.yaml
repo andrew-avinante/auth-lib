@@ -1,0 +1,62 @@
+name: Release
+
+on:
+  release:
+    types: [ published ]
+
+jobs:
+  calculate_version:
+    name: Calculate version information
+    runs-on: self-hosted
+    container:
+      image: registry.crookedcactus.net/v2/dev-tools/ubuntu-dev:1.0.0
+      credentials:
+        username: ${{ secrets.REGISTRY_USERNAME }}
+        password: ${{ secrets.REGISTRY_PASSWORD }}
+    steps:
+      - name: Get the sources
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: '0'
+      - name: Configure Git
+        shell: bash
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+          git config user.name "$GITHUB_ACTOR"
+      - name: Extract Docker Tag
+        shell: bash
+        run: |
+          tag=$(git describe --tags --abbrev=0)
+          echo "GIT_TAG=${tag:1}" >> $GITHUB_ENV
+          echo "DOCKER_TAG=${tag/-alpha/}" >> $GITHUB_ENV
+      - name: Extract Artifacts Version
+        shell: bash
+        run: |
+          tag=$(git describe --tags --abbrev=0)
+          echo "ARTIFACTS_VERSION=${tag}" >> $GITHUB_ENV
+          echo "INFO_VERSION=${tag:1}" >> $GITHUB_ENV
+    outputs:
+      git_tag: ${{ env.GIT_TAG }}
+      docker_tag: ${{ env.DOCKER_TAG }}
+      artifacts_version: ${{ env.ARTIFACTS_VERSION }}
+      info_version: ${{ env.INFO_VERSION }}
+  build_and_test:
+    name: Build and Test
+    needs: calculate_version
+    uses: andrew-avinante/auth-lib/.github/workflows/build.yaml@master
+    secrets:
+      REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+      REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+  upload_artifacts:
+    name: Upload Artifacts
+    uses: andrew-avinante/media-center/.github/workflows/artifacts.yaml@master
+    needs: build_and_test
+    with:
+      release_tag: ${{ needs.calculate_version.outputs.artifacts_version }}
+      release_version: ${{ needs.calculate_version.outputs.artifacts_version }}
+      info_version: ${{ needs.calculate_version.outputs.info_version }}
+    secrets:
+      gh_token: ${{ secrets.GITHUB_TOKEN }}
+      REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+      REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}

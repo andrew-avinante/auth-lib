@@ -1,7 +1,8 @@
 ﻿using AuthLib.Managers.Auth;
 using AuthLib.Managers.Util;
-using AuthLib.Model.API;
 using AuthLib.Model.API.Auth;
+using AuthLib.Model.API.Response;
+using AuthLib.Model.API.Response.Error;
 using AuthLib.Model.Auth;
 using AuthLib.Model.Db;
 using Microsoft.AspNetCore.Authorization;
@@ -64,7 +65,7 @@ namespace AuthLib.Controllers.Auth
                 await _loggerService.LogInfo(this, $"Password incorrect for user '{model.Username}'", StatusCodes.Status401Unauthorized);
             }
 
-            return Unauthorized();
+            return Unauthorized(UserErrorResponse.UserAccessDenied());
         }
 
         /// <summary>
@@ -80,7 +81,7 @@ namespace AuthLib.Controllers.Auth
             if (userExists != null)
             {
                 await _loggerService.LogInfo(this, $"Attempted creation of existing user '{model.Username}'", StatusCodes.Status409Conflict);
-                return Conflict(ApiResponse.Error("User already exists"));
+                return Conflict(UserErrorResponse.UserExists("User already exists"));
             }
 
             ApplicationUser user = new()
@@ -103,7 +104,7 @@ namespace AuthLib.Controllers.Auth
 
                 await _loggerService.LogWarn(this, $"Could not create user: ${message}", StatusCodes.Status422UnprocessableEntity);
 
-                return UnprocessableEntity(ApiResponse.Error(message));
+                return UnprocessableEntity(GeneralErrorResponse.UnprocessableEntity());
             }
 
             await AddUserToRoleAsync(user, UserRoles.User);
@@ -127,13 +128,13 @@ namespace AuthLib.Controllers.Auth
             if (user is null)
             {
                 await _loggerService.LogInfo(this, $"No user '{username}' found", StatusCodes.Status400BadRequest);
-                return BadRequest(ApiResponse.Error($"User `{username}` is not found!"));
+                return BadRequest(UserErrorResponse.NoUserFound($"User `{username}` is not found!"));
             }
 
             if (!await _roleManager.RoleExistsAsync(roleId))
             {
                 await _loggerService.LogInfo(this, $"No role with id '{roleId}' found", StatusCodes.Status400BadRequest);
-                return BadRequest(ApiResponse.Error($"Role `{roleId} is not found!"));
+                return BadRequest(UserErrorResponse.NoRoleFound($"Role `{roleId} is not found!"));
             }
 
             await _userManager.AddToRoleAsync(user, roleId);
@@ -156,7 +157,8 @@ namespace AuthLib.Controllers.Auth
                 {
                     new Claim(ClaimTypes.Name, user.UserName),
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                    new Claim(ClaimTypes.NameIdentifier, user.Id)
+                    new Claim(ClaimTypes.NameIdentifier, user.Id),
+                    new Claim("registrationCompleted", "false")
                 };
 
             // Add role claims
@@ -191,6 +193,11 @@ namespace AuthLib.Controllers.Auth
             }
 
             await _userManager.AddToRoleAsync(user, role);
+        }
+
+        private async Task<bool> IsUserSetup(ApplicationUser user)
+        {
+            Person person = Per
         }
     }
 }

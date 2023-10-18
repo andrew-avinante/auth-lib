@@ -1,0 +1,38 @@
+name: CI/CD
+
+on:
+  push:
+    branches:
+    - '*'
+    - '!refs/tags/*'
+  pull_request:
+  workflow_call:
+      secrets:
+        REGISTRY_USERNAME:
+          required: true
+        REGISTRY_PASSWORD:
+          required: true
+
+jobs:
+  build:
+    name: Build and Test Pipeline
+    runs-on: self-hosted
+    container:
+      image: registry.crookedcactus.net/v2/dev-tools/dotnet:1.0.2
+      credentials:
+        username: ${{ secrets.REGISTRY_USERNAME }}
+        password: ${{ secrets.REGISTRY_PASSWORD }}
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: 7.0.x
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build -c Release

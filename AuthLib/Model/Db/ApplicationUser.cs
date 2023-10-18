@@ -8,5 +8,6 @@ namespace AuthLib.Model.Db
         public List<Log>? Log { get; set; }
         public List<RefreshToken>? RefreshTokens { get; set; }
         public List<ApiKeys>? ApiKeys { get; set; }
+        public User? User { get; set; }
     }
 }

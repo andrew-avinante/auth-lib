@@ -1,7 +1,8 @@
 ﻿using AuthLib.Managers.Auth;
 using AuthLib.Managers.Util;
-using AuthLib.Model.API;
 using AuthLib.Model.API.Auth;
+using AuthLib.Model.API.Response;
+using AuthLib.Model.API.Response.Error;
 using AuthLib.Model.Db;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -45,7 +46,7 @@ namespace AuthLib.Controllers.Auth
             if (tokenModel is null)
             {
                 await _loggerService.LogInfo(this, $"User sent a null token model", StatusCodes.Status400BadRequest);
-                return BadRequest(ApiResponse.Error("Access token and refresh token are required"));
+                return BadRequest(TokenErrorResponse.TokenRequired());
             }
 
             // Validates token
@@ -57,7 +58,7 @@ namespace AuthLib.Controllers.Auth
             catch(Exception e)
             {
                 await _loggerService.LogError(this, $"Error while validating token: {e}", StatusCodes.Status422UnprocessableEntity);
-                return UnprocessableEntity(ApiResponse.Error("Access token is invalid"));
+                return UnprocessableEntity(TokenErrorResponse.TokenExpired());
             }
 
             string? username = principal.Identity?.Name;
@@ -67,7 +68,7 @@ namespace AuthLib.Controllers.Auth
             if (user == null)
             {
                 await _loggerService.LogInfo(this, $"No user with name claim `{username}` found", StatusCodes.Status400BadRequest);
-                return BadRequest("User not found");
+                return BadRequest(UserErrorResponse.NoUserFound());
             }
 
             RefreshToken? refreshToken = _dbContext.
@@ -80,13 +81,13 @@ namespace AuthLib.Controllers.Auth
             if (refreshToken is null)
             {
                 await _loggerService.LogInfo(this, "Refresh token not found", StatusCodes.Status404NotFound);
-                return NotFound(ApiResponse.Error("No user found"));
+                return NotFound(UserErrorResponse.NoUserFound());
             }
                 
             if (refreshToken.RefreshTokenExpiryTime <= DateTime.Now)
             {
                 await _loggerService.LogInfo(this, "User had expired refresh token", StatusCodes.Status422UnprocessableEntity);
-                return UnprocessableEntity("Refresh token is expired");
+                return UnprocessableEntity(TokenErrorResponse.TokenExpired());
             }
 
             JwtSecurityToken newAccessToken = _tokenService.GenerateAccessToken(principal.Claims.ToList());
@@ -116,14 +117,14 @@ namespace AuthLib.Controllers.Auth
             if (username != User.Identity?.Name)
             {
                 await _loggerService.LogInfo(this, $"User attempted to revoke {username}'s tokens", StatusCodes.Status403Forbidden);
-                return Forbid("Username mismatch");
+                return StatusCode(StatusCodes.Status403Forbidden, UserErrorResponse.UserAccessDenied());
             }
 
             ApplicationUser user = await _userManager.FindByNameAsync(username);
             if (user == null)
             {
                 await _loggerService.LogInfo(this, "User not found", StatusCodes.Status400BadRequest);
-                return BadRequest(ApiResponse.Error("User doesn't exist"));
+                return BadRequest(UserErrorResponse.NoUserFound());
             }
 
             _dbContext.RefreshToken?.RemoveRange(_dbContext.RefreshToken.Where(x => x.ApplicationUserId == user.Id));
